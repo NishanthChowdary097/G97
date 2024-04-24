@@ -12,7 +12,7 @@ from nltk.stem import WordNetLemmatizer
 
 lematizer = WordNetLemmatizer
 
-intents = json.loads(open('C:/Users/nisha/OneDrive/Desktop/webdev/G97/nlp/intends.json').read())
+intents = json.loads('./intends.json').read()
 
 words = []
 classes =[]
