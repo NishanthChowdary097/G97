@@ -30,3 +30,6 @@ Authorization : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtYWlsIjoiYUBnbWFpbC5jb20
 ###
 
 GET {{url}}/laga HTTP/1.1
+
+###
+GET {{url}}/stop HTTP/1.1

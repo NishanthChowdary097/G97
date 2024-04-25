@@ -1,9 +1,10 @@
 const express = require("express");
 const bcrypt= require("bcrypt");
 const jwt = require("jsonwebtoken");
+require('dotenv').config()
 const { default: mongoose } = require("mongoose");
 const app = express();
-const port=3000;
+const port=process.env.PORT;
 const secretKey="hi";
 
 const {recipe,user} = require("./schema/schema");
@@ -13,7 +14,7 @@ app.use(express.json())
 
 let connect = async () => { 
     try{ 
-        await mongoose.connect("mongodb+srv://amethyst88:Nigger123@cluster0.43osksu.mongodb.net/KitchenWizard");
+        await mongoose.connect(process.env.DB_URI);
         console.log("db ready");
         return true
     }
@@ -25,6 +26,13 @@ let connect = async () => {
 if(connect()){
     var db=mongoose.connection;
 }
+app.get("/stop",(req,res)=>{
+    res.send(JSON.stringify({
+        error:false,
+        status:"sleeping"
+    }));
+    process.exit();
+})
 app.get("/",(req,res)=>{
     res.send(JSON.stringify({
         "error":"false",
