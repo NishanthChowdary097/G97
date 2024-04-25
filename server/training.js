@@ -18,7 +18,7 @@ const cookingSteps = [
 
 // Generate some text for each cooking step
 const prompts = cookingSteps.map((step, i) => `Step ${i + 1}: ${step}`);
-const responses = await Promise.all(prompts.map(prompt => generator(prompt)));
+const responses = Promise.all(prompts.map(prompt => generator(prompt)));
 
 // Print the generated recipe
 const recipe = responses.map(response => response.generatedText).join('\n');
