@@ -19,15 +19,26 @@ let userSchema=new mongoose.Schema({
 let user = new mongoose.model('users',userSchema);
 
 let recipeScema = new mongoose.Schema({
-    id:{
-        type:Number
-    },
     name:{
         type:String,
         required:true
     },
+    image:{
+        type:String,
+        required:true
+    },
+    inredients:{
+        type:[{type:String}]
+    },
     steps:{
         type:[{type:String}]
+    },
+    tags:{
+        type:[{type:String}]
+    },
+    user:{
+        type:String,
+        required:true
     }
 })
 

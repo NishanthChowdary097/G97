@@ -90,18 +90,11 @@ async function auth (req, res, next){
     try {
       const decodedToken = jwt.verify(token, secretKey);
       const mail = decodedToken.mail;
-
       const us = await user.findOne({mail});
       if (!us) {
         return res.status(404).json({ message: 'User not found' });
       }
-  
-      req.user = {
-        id: user._id,
-        mail: user.mail,
-        username: user.username
-      };
-
+      req.usr = us;
       next();
     } catch (error) {
     //   console.log('Token Verification Error:', error);
@@ -109,13 +102,13 @@ async function auth (req, res, next){
     }
   };
 
-app.get("*",(req,res)=>{
+app.get("*",(_,res)=>{
     res.status(404).send({
         "error":true,
         "msg":"the page you are looking for is not looking for you"
     });
 })
-app.post("*",(req,res)=>{
+app.post("*",(_,res)=>{
     res.status(404).send({
         "error":true,
         "msg":"the page you are looking for is not looking for you"
