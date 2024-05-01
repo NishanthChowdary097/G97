@@ -1,0 +1,9 @@
+# Natural Language Processing Requirements
+numpy
+pandas
+scikit-learn
+nltk
+spacy
+gensim
+transformers
+torch

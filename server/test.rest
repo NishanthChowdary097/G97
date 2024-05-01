@@ -66,21 +66,27 @@ Content-Type: application/json
 #     "image":"https://www.themealdb.com/images/medisa/meals/wvwxxw1468252753.jpg"
 # }
 
+# {
+#     "name":"shallot chicken",
+#     "ingredients":["shallot","chicken","onion","garlic","biryani"],
+#     "steps":["chop shallot","chop chicken","chop onion","chop garlic","add all to a bowl",],
+#     "tags":["chicken","onion","garlic","biryani"],
+#     "image":"https://www.themealdb.com/images/medisa/meals/wvwxxw1468252753.jpg"
+# }
 {
-    "name":"shallot chicken",
+    "name":"chicken shawarma",
     "ingredients":["shallot","chicken","onion","garlic","biryani"],
-    "steps":["chop shallot","chop chicken","chop onion","chop garlic","add all to a bowl",],
-    "tags":["chicken","onion","garlic","biryani"],
+    "steps":["chop shallot","chop chicken","chop onion","chop garlic","add all to a bowl"],
+    "tags":["mayo","salt","gravy","chapathi"],
     "image":"https://www.themealdb.com/images/medisa/meals/wvwxxw1468252753.jpg"
 }
-
 ###
 POST {{url}}/v2/search HTTP/1.1
 Authorization: {{token}}
 Content-Type: application/json
 
 {
-    "tag":["chicken","onion","garlic","biryani"]
+    "tag":["mayo"]
 }
 ###
 GET {{url}}/stop HTTP/1.1

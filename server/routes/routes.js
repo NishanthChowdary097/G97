@@ -91,17 +91,10 @@ route.post('/addrecipe',async (req,res)=>{
 //in compleat compleat the search engine
 route.post('/search',async (req,res)=>{
   let tag=req.body.tag;
-  var data=new Set();
-  tag.forEach(async t=>{
-    let resp=await recipe.find({tags:t});
-    resp.forEach(element => {
-      data.add(element);
-    });
-    console.log(data)
-  });
+  var resp=await recipe.find({tags:{$in:tag}});
   res.send(JSON.stringify({
     error:false,
-    data:data
+    data:resp
   }));
 });
 
