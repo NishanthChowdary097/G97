@@ -36,7 +36,7 @@ app.get("/stop",(req,res)=>{
 app.get("/",(req,res)=>{
     res.send(JSON.stringify({
         "error":"false",
-        "msg":"server awake"
+        "msg":"server alive"
     }));
 })
 

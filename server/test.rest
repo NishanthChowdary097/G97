@@ -4,7 +4,7 @@
 
 GET {{url}}
 
-### 
+###
 POST {{url}}/signup HTTP/1.1
 Content-Type: application/json
 
@@ -74,5 +74,13 @@ Content-Type: application/json
     "image":"https://www.themealdb.com/images/medisa/meals/wvwxxw1468252753.jpg"
 }
 
+###
+POST {{url}}/v2/search HTTP/1.1
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+    "tag":["chicken","onion","garlic","biryani"]
+}
 ###
 GET {{url}}/stop HTTP/1.1
