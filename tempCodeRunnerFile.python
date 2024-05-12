@@ -1,0 +1,67 @@
+import pygame
+import random
+
+# Initialize pygame
+pygame.init()
+
+# Constants
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+PLAYER_SPEED = 5
+BOT_SPEED = 3
+
+# Set up the display
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("1 v Bot Spaceship Game")
+
+# Load images
+player_img = pygame.image.load('player_spaceship.png')  # Replace with your image path
+bot_img = pygame.image.load('bot_spaceship.png')    # Replace with your image path
+
+# Player and bot positions
+player_pos = [SCREEN_WIDTH // 2, SCREEN_HEIGHT - 100]
+bot_pos = [random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT)]
+
+# Clock to control the frame rate
+clock = pygame.time.Clock()
+
+# Game loop
+running = True
+while running:
+    # Handle events
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    # Move the player
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_UP]:
+        player_pos[1] -= PLAYER_SPEED
+    if keys[pygame.K_DOWN]:
+        player_pos[1] += PLAYER_SPEED
+
+    # Keep player in bounds
+    player_pos[1] = max(0, min(player_pos[1], SCREEN_HEIGHT - player_img.get_height()))
+
+    # Move the bot
+    bot_pos[0] += random.choice([-BOT_SPEED, 0, BOT_SPEED])
+    bot_pos[1] += random.choice([-BOT_SPEED, 0, BOT_SPEED])
+
+    # Keep bot in bounds
+    bot_pos[0] = max(0, min(bot_pos[0], SCREEN_WIDTH - bot_img.get_width()))
+    bot_pos[1] = max(0, min(bot_pos[1], SCREEN_HEIGHT - bot_img.get_height()))
+
+    # Fill the screen with a black background
+    screen.fill((0, 0, 0))
+
+    # Blit the player and bot images
+    screen.blit(player_img, player_pos)
+    screen.blit(bot_img, bot_pos)
+
+    # Update the display
+    pygame.display.flip()
+
+    # Cap the frame rate
+    clock.tick(60)
+
+# Quit pygame

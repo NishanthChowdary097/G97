@@ -10,6 +10,86 @@ const veerasimhareddy=require("../schema/reddis");
 const reddy= new  veerasimhareddy();
 reddy.start();
 
+route.get("/", (_, res) => {
+  res.send(
+    JSON.stringify({
+      error: false,
+      msg: "good",
+    })
+  );
+});
+
+/**
+ * Handles the route to add a favorite item to the user's favorites.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @returns {void}
+ */
+route.get("/addfav/:id", async (req, res) => {
+  let usr = req.usr;
+  let id = req.params.id;
+  if (usr.fav.includes(id)) {
+    res.send(
+      JSON.stringify({
+        error: true,
+        status: "already in fav",
+      })
+    );
+  } else {
+    usr.fav.push(id);
+    await user.updateOne({ _id: usr._id }, { $set: { fav: usr.fav } });
+
+    res.send(
+      JSON.stringify({
+        error: false,
+        status: "added to fav",
+      })
+    );
+  }
+});
+
+/**
+ * Handles the route to retrieve the user's favorite items.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @returns {void}
+ */
+route.get("/myfav", async (req, res) => {
+  res.send(
+    JSON.stringify({
+      error: false,
+      fav: req.usr.fav,
+    })
+  );
+});
+
+/**
+ * Handles the route to retrieve the details of a specific favorite item.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @returns {void}
+ */
+route.get("/myfav/:fav", async (req, res) => {
+  if (await reddy.exists(req.params.fav)) {
+    res.send(
+      JSON.stringify({
+        error: false,
+        data: await reddy.getrecipe(req.params.fav),
+      })
+    );
+  } else {
+    const resp = await recipe.find({ _id: req.params.fav });
+    data = [];
+    resp[0]["inredients"].forEach((element) => {
+      data.push(element);
+    });
+  }
+});
+
+
 //done
 route.get("/",(_,res)=>{
   res.send(JSON.stringify({
@@ -71,8 +151,27 @@ route.get("/myfav/:fav",async (req,res)=>{
   }
 });
 
+//incomplete
+route.delete("/remfav/:id",async (req,res)=>{
+  let usr=req.usr;
+  let id=req.params.id;
+  if(usr.fav.includes(id)){
+    usr.fav.splice(usr.fav.indexOf(id),1);
+    await user.updateOne({_id:usr._id},{$set:{fav:usr}})
+    res.send(JSON.stringify({
+      error:false,
+      status:"removed from fav"
+    }));
+  }else{
+    res.send(JSON.stringify({
+      error:true,
+      status:"not in fav"
+    }));
+}});
+
 //done
 route.post('/addrecipe',async (req,res)=>{
+  try{
   let recip={
         "name":req.body.name,
         "inredients":req.body.ingredients,
@@ -81,29 +180,88 @@ route.post('/addrecipe',async (req,res)=>{
         "image":req.body.image,
         "user":req.usr._id
     }
-    await new recipe(recip).save();
+    let resp = await new recipe(recip).save();
+    if(resp){
+      res.send(JSON.stringify({
+        error:false,
+        status:"recipe added"
+      }));
+    }else{
+      res.send(JSON.stringify({
+        error:true,
+        status:"failed to add recipe"
+      }));
+    }
+  }catch{
+    res.status(500).send(JSON.stringify({
+      "error":true,
+      "msg":"server error"
+    }));
+  }
+});
+
+//incomplete
+route.delete("/delete/:id",async (req,res)=>{
+  try{let id=req.params.id;
+  let dele = await recipe.deleteOne({_id:id});
+  if(dele.deletedCount==1){
+    res.send(JSON.stringify({
+      "error":false,
+      "msg":"recipe deleted"
+    }));
+  }else{
+    res.send(JSON.stringify({
+      "error":true,
+      "msg":"recipe dose not exist"
+    }));
+  }}catch{
+    res.status(500).send(JSON.stringify({
+      "error":true,
+      "msg":"server error"
+    }));
+  }
+});
+//incomplet, compleat the search engine
+route.post('/search',async (req,res)=>{
+  try{
+    let tag=req.body.tag;
+    var resp=await recipe.find({tags:{$in:tag}});
     res.send(JSON.stringify({
       error:false,
-      status:"recipe added"
+      data:resp
     }));
+  }catch{
+    res.status(500).send(JSON.stringify({
+      "error":true,
+      "msg":"server error"
+    }));
+  }
 });
 
-//in compleat compleat the search engine
-route.post('/search',async (req,res)=>{
-  let tag=req.body.tag;
-  var resp=await recipe.find({tags:{$in:tag}});
-  res.send(JSON.stringify({
-    error:false,
-    data:resp
-  }));
-});
-
+//incomplete with NLP
 route.get("/generate",async (req,res)=>{
   res.send(JSON.stringify({
     "error":true,
     "msg":"not implemented"
   }));
 })
+
+//incomplete deletuser
+route.delete("/signout",async (req,res)=>{
+  await user.deleteOne({_id:req.usr._id});
+  try{
+    res.send(JSON.stringify({
+      "error":false,
+      "msg":"user deleted"
+    }));
+  }catch(err){
+    res.send(JSON.stringify({
+      "error":true,
+      "msg":"user not found"
+    }));
+  }
+});
+
 
 //done
 route.get("*",(_,res)=>{
@@ -113,4 +271,4 @@ route.get("*",(_,res)=>{
     });
 });
 
-module.exports = route; 
+module.exports = route;

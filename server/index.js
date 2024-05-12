@@ -5,9 +5,8 @@ require('dotenv').config()
 const { default: mongoose } = require("mongoose");
 const app = express();
 const port=process.env.PORT;
-const secretKey="hi";
 
-const {recipe,user} = require("./schema/schema");
+const {_,user} = require("./schema/schema");
 const routes = require("./routes/routes");
 
 app.use(express.json())
@@ -67,7 +66,9 @@ app.post('/login',async(req,res)=>{
     
     if(check){
         if(await bcrypt.compare(pass,check.password)){
-            const token = jwt.sign({ mail: mail ,roll:"user",id:check._id}, secretKey);
+            // const token = jwt.sign({ mail: mail ,roll:"user",id:check._id}, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE });
+            const token = jwt.sign({ mail: mail ,roll:"user",id:check._id}, process.env.JWT_SECRET);
+
             res.send(JSON.stringify({
                 "error":false,
                 "token": token
@@ -88,7 +89,7 @@ async function auth (req, res, next){
     if (!token) return res.status(401).json({erroe:true, msg: 'unauthorized' });
   
     try {
-      const decodedToken = jwt.verify(token, secretKey);
+      const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
       const mail = decodedToken.mail;
       const us = await user.findOne({mail});
       if (!us) {

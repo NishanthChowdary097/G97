@@ -1,6 +1,6 @@
 # to use this file u need rest client installed in vs code;
 @url=http://localhost:3333
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtYWlsIjoiYUBnbWFpbC5jb20iLCJyb2xsIjoidXNlciIsImlkIjoiNjYyYTI2NGVhNTUxMjlkZDlhYTIwYTcwIiwiaWF0IjoxNzE0MDQwNTIxfQ.O6aF8VDq6Ii1T47ghB6URVLOLz_g3jvHfK1LpkhC3OU
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtYWlsIjoiYUBnbWFpbC5jb20iLCJyb2xsIjoidXNlciIsImlkIjoiNjYzM2E4OTAzMGMzOTEwNWYyZTA3ZjdhIiwiaWF0IjoxNzE0NjYxNTIyfQ.j4LdQsKHRsHQIMkOiOdkewM6iPEL9EyWb6_Q_dnpG7I
 
 GET {{url}}
 
@@ -88,5 +88,11 @@ Content-Type: application/json
 {
     "tag":["mayo"]
 }
+###
+DELETE {{url}}/v2/delete/663083bd2f096b77cc01337a HTTP/1.1
+Authorization: {{token}}
+
+###
+DELETE {{url}}/v2/signout/ HTTP/1.1
 ###
 GET {{url}}/stop HTTP/1.1
