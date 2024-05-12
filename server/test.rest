@@ -94,5 +94,7 @@ Authorization: {{token}}
 
 ###
 DELETE {{url}}/v2/signout/ HTTP/1.1
+Authorization: {{token}}
+
 ###
 GET {{url}}/stop HTTP/1.1
