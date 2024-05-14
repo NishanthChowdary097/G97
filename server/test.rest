@@ -1,6 +1,6 @@
 # to use this file u need rest client installed in vs code;
 @url=http://localhost:3333
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtYWlsIjoiYUBnbWFpbC5jb20iLCJyb2xsIjoidXNlciIsImlkIjoiNjYzM2E4OTAzMGMzOTEwNWYyZTA3ZjdhIiwiaWF0IjoxNzE0NjYxNTIyfQ.j4LdQsKHRsHQIMkOiOdkewM6iPEL9EyWb6_Q_dnpG7I
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtYWlsIjoiYUBnbWFpbC5jb20iLCJyb2xsIjoidXNlciIsImlkIjoiNjY0MDhkYjA4MWU2MWI5NGY4YWU0ZWNhIiwiaWF0IjoxNzE1NTA2NjEzfQ.23XeuBQeHBGcvKXaeCdgybVQ0lIackxfVnLp1W-Z2OM
 
 GET {{url}}
 
