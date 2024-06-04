@@ -46,7 +46,6 @@ app.post("/signup",async (req,res)=>{
     
     var check = await user.findOne({mail});
     if(check){
-        console.log("user already exist");
         res.send(JSON.stringify({
             "error":true,
             "msg":"user exists"

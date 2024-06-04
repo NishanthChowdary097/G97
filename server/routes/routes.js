@@ -1,94 +1,10 @@
 const express = require("express")
-/**
-* Initializes an Express router instance.
-* This router instance can be used to define routes and handle HTTP requests for the application.
-*/
 const route = express.Router();
 const {recipe,user}=require("../schema/schema");
 const veerasimhareddy=require("../schema/reddis");
 
 const reddy= new  veerasimhareddy();
 reddy.start();
-
-route.get("/", (_, res) => {
-  res.send(
-    JSON.stringify({
-      error: false,
-      msg: "good",
-    })
-  );
-});
-
-/**
- * Handles the route to add a favorite item to the user's favorites.
- *
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- * @returns {void}
- */
-route.get("/addfav/:id", async (req, res) => {
-  let usr = req.usr;
-  let id = req.params.id;
-  if (usr.fav.includes(id)) {
-    res.send(
-      JSON.stringify({
-        error: true,
-        status: "already in fav",
-      })
-    );
-  } else {
-    usr.fav.push(id);
-    await user.updateOne({ _id: usr._id }, { $set: { fav: usr.fav } });
-
-    res.send(
-      JSON.stringify({
-        error: false,
-        status: "added to fav",
-      })
-    );
-  }
-});
-
-/**
- * Handles the route to retrieve the user's favorite items.
- *
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- * @returns {void}
- */
-route.get("/myfav", async (req, res) => {
-  res.send(
-    JSON.stringify({
-      error: false,
-      fav: req.usr.fav,
-    })
-  );
-});
-
-/**
- * Handles the route to retrieve the details of a specific favorite item.
- *
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- * @returns {void}
- */
-route.get("/myfav/:fav", async (req, res) => {
-  if (await reddy.exists(req.params.fav)) {
-    res.send(
-      JSON.stringify({
-        error: false,
-        data: await reddy.getrecipe(req.params.fav),
-      })
-    );
-  } else {
-    const resp = await recipe.find({ _id: req.params.fav });
-    data = [];
-    resp[0]["inredients"].forEach((element) => {
-      data.push(element);
-    });
-  }
-});
-
 
 //done
 route.get("/",(_,res)=>{

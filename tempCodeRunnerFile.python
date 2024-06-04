@@ -1,0 +1,74 @@
+from bs4 import BeautifulSoup
+import pymongo
+
+client = pymongo.MongoClient("mongodb+srv://Holandnigger:Holandnigger@cluster0.sbl4v0z.mongodb.net/")
+db=client["results"]
+col1=db["res"]
+col2=db["ParsedRes"]
+resd=col1.find({}).sort({"roll":1})
+for i in resd:
+	res_data={}
+	soup=BeautifulSoup(i["result"],"html.parser")
+
+	tables = (soup.find_all("table"))
+
+	personal_data=tables[0].text.split("\n")
+	for index,i in enumerate(personal_data):
+		if("Hall Ticket No." in i):
+			res_data["Hall_Ticket"]=int(personal_data[index+1][2:])
+		elif("Gender" in i):
+			res_data["Gender"]=personal_data[index+1][1:]
+		elif("Name" in i):
+			res_data["Name"]=personal_data[index+1][1:]
+		elif("Father's Name" in i):
+			res_data["Father_Name"]=personal_data[index+1][1:]
+		elif("Course" in i):
+			res_data["Course"]=personal_data[index+1]
+		elif("Medium" in i):
+			res_data["Medium"]=personal_data[index+1][1:]
+			
+	marks_data=[]
+	marks=tables[1].text
+	marks=marks.replace("\xa0","")
+	marks=marks.split("\n")
+	marks.remove(marks[1])
+	subject={}
+	for index,i in enumerate(marks):
+		if(index>7 and index!=len(marks)-1):
+			if((index-2)%6==0):
+				subject["code"]=i
+			elif((index-2)%6==1):
+				subject["name"]=i
+			elif((index-2)%6==2):
+				subject["creadits"]=i
+			elif((index-2)%6==3):
+				subject["score"]=i
+			elif((index-2)%6==4):
+				subject["grade"]=i
+			else:
+				marks_data.append(subject)
+				subject={}
+
+	res_data["marks"]=marks_data
+
+	gpa_list=tables[2].text.replace(" ","")
+	gpa_list=gpa_list.split("\n")
+	for i in range(gpa_list.count('')):
+		gpa_list.remove("")
+	gpa_list.remove('Result')
+	gpa_list.remove('Semester')
+	gpa_list.remove('ResultWithSGPA')
+	gpa_list.remove('OverallCGPA')
+	gpa_data=[]
+	gpa={}
+	for index,i in enumerate(gpa_list):
+		if(index%3==0):
+			gpa["sem"]=i
+		elif(index%3==1):
+			gpa["gpa"]=i
+		else:
+			gpa_data.append(gpa)
+			gpa={}
+	res_data["gpa"]=gpa_data
+	col2.insert_one(res_data)
+print('done')
