@@ -48,11 +48,12 @@ GET {{url}}/v2/myfav HTTP/1.1
 Authorization: {{token}}
 
 ###
-GET {{url}}/v2/addfav/663083bd2f096b77cc01337a HTTP/1.1
+GET {{url}}/v2/addfav/663085781b91514e966628c2 HTTP/1.1
 Authorization: {{token}}
 ###
-GET {{url}}/v2/myfav/663083bd2f096b77cc01337a HTTP/1.1
+GET {{url}}/v2/myfav/663085781b91514e966628c2 HTTP/1.1
 Authorization: {{token}}
+
 ###
 POST  {{url}}/v2/addrecipe HTTP/1.1
 Authorization: {{token}}
@@ -91,10 +92,15 @@ Content-Type: application/json
 ###
 DELETE {{url}}/v2/delete/663083bd2f096b77cc01337a HTTP/1.1
 Authorization: {{token}}
-
+###
+DELETE {{url}}/v2/remfav/663085781b91514e966628c2 HTTP/1.1
+Authorization: {{token}}
 ###
 DELETE {{url}}/v2/signout/ HTTP/1.1
 Authorization: {{token}}
 
 ###
 GET {{url}}/stop HTTP/1.1
+
+###
+
