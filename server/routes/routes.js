@@ -12,7 +12,7 @@ route.get("/",(_,res)=>{
     "error":false,
     "msg":"good"
   }));
-}); 
+});
 
 //done
 route.get("/addfav/:id",async (req,res)=>{
