@@ -1,5 +1,5 @@
 let mongoose = require('mongoose');
-
+//add lang in user scema
 let userSchema=new mongoose.Schema({
     mail:{
         type:String,
