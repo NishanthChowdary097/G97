@@ -1,25 +1,23 @@
 const Ing = require("../Models/IngModel.js")
 const Fav = require("../Models/FavModel.js")
+const axios = require('axios');
 
 
 
 
 
-const getAllIngs = async(req, res) => {
-    try{
+const getAllIngs = async (req, res) => {
+    try {
         const ingredients = await Ing.find({}, { _id: 0, ingredient: 1 }).exec();
-
-        // Extract and print the ingredients
         const ingredientList = ingredients.map(doc => doc.ingredient);
         res.json({ ingredients: ingredientList });
-    } catch(e) {
+    } catch (e) {
         console.log("Error: ", e);
-        res.json(500).json({error: "Error fetching ingredients"})
+        res.json(500).json({ error: "Error fetching ingredients"}, e)
     }
 }
 
-const fetchRecipes = async(req, res) => {
-    console.log(req.body.ingredients, " received !");
+const fetchRecipes = async (req, res) => {
     const recipes = [
         {
             name: 'Spaghetti Carbonara',
@@ -121,7 +119,7 @@ const fetchRecipes = async(req, res) => {
                 'Add croutons and grated Parmesan.',
                 'Slice the grilled chicken and add to the salad.',
                 'Toss with Caesar dressing and serve.'
-            ], 
+            ],
             ingredients: [
                 'Chicken breasts',
                 'Romaine lettuce',
@@ -139,7 +137,7 @@ const fetchRecipes = async(req, res) => {
                 'Heat a griddle and pour batter to form pancakes.',
                 'Cook until bubbles form, then flip and cook until golden.',
                 'Serve with syrup and butter.'
-            ], 
+            ],
             ingredients: [
                 'Flour',
                 'Sugar',
@@ -209,18 +207,46 @@ const fetchRecipes = async(req, res) => {
             ]
         }
     ]
-    res.status(200).json({recipes: recipes});
+    res.status(200).json({ recipes: recipes });
 }
 
-const fetchFavs = async(req, res) => {
+const starRecipe = async (req, res) => {
+    try {
+        const { name, steps, ingredients } = req.body;
+
+        if (!name || !steps || !ingredients) {
+            return res.status(400).json({ error: 'Missing recipe details' });
+        }
+
+        const existingRecipe = await Fav.findOne({ recipeName: name });
+        if (existingRecipe) {
+            return res.status(400).json({ warning: 'Recipe already exists in favourites. Please refresh the sidebar' });
+        }
+
+        const newFavourite = {
+            recipeName: name,
+            recipeIngrids: ingredients,
+            recipeStps: steps,
+        };
+
+        const result = new Fav(newFavourite);
+        await result.save();
+
+        res.status(200).json({ message: 'Recipe added to favourites' });
+    } catch (error) {
+        console.error('Error inserting favourite recipe:', error);
+        res.status(500).json({ error: 'Failed to add recipe to favourites' });
+    }
+};
+
+
+const fetchFavs = async (req, res) => {
     const favourites = await Fav.find();
-    console.log(favourites);
     res.status(200).json(favourites);
 }
 
-const removeRecipe = async(req, res) => {
+const removeRecipe = async (req, res) => {
     const { recipeName } = req.body;
-    console.log(recipeName);
     try {
         const deletedRecipe = await Fav.findOneAndDelete({ recipeName: recipeName });
         if (!deletedRecipe) {
@@ -233,5 +259,32 @@ const removeRecipe = async(req, res) => {
     }
 }
 
+const createImage = async (req, res) => {
+    const {recipeName, recipeIngrids} = req.body;
+    console.log("name:", recipeName);
+    const options = {
+        method: 'POST',
+        url: 'https://chatgpt-42.p.rapidapi.com/texttoimage',
+        headers: {
+            'x-rapidapi-key': process.env.RAPID_API_KEY,
+            'x-rapidapi-host': 'chatgpt-42.p.rapidapi.com',
+            'Content-Type': 'application/json'
+        },
+        data: {
+            text: recipeName,
+            width: 512,
+            height: 512
+        }
+    };
 
-module.exports = {getAllIngs, fetchRecipes, fetchFavs, removeRecipe};
+    try {
+        const response = await axios.request(options);
+        res.status(200).json(response.data)
+    } catch (error) {
+        console.error(error);
+        res.status(400).json("Error:", error)
+    }
+}
+
+
+module.exports = { getAllIngs, fetchRecipes, fetchFavs, removeRecipe, starRecipe, createImage };

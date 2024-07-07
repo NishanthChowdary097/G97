@@ -48,6 +48,7 @@ const Sidebar = ({ isOpen, toggleSidebar, activeTab, setActiveTab }) => {
     if (activeTab === 'favourites') {
       fetchFavourites();
     } else if (activeTab === 'ai') {
+      // Add AI related refresh logic if needed
     }
     setTimeout(() => setIsRotating(false), 500);
   };
@@ -78,7 +79,7 @@ const Sidebar = ({ isOpen, toggleSidebar, activeTab, setActiveTab }) => {
   };
 
   return (
-    <div className={`fixed inset-y-0 left-0 bg-gray-800 text-white transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:w-screen lg:w-80`}>
+    <div className={`fixed inset-y-0 left-0 bg-gray-800 text-white transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:w-60 lg:w-80`}>
       <div className="flex items-center justify-between p-4">
         <button onClick={toggleSidebar} className="block">
           <FaLeftLong className='ml-2 text-2xl'/>
@@ -109,25 +110,29 @@ const Sidebar = ({ isOpen, toggleSidebar, activeTab, setActiveTab }) => {
       <div className="px-4 ">
         {activeTab === 'favourites' ? (
           <div>
-            {favourites.map((recipe, index) => (
-              <div 
-                key={index} 
-                onMouseEnter={(e) => e.currentTarget.querySelector('.delete-icon').classList.remove('hidden')}
-                onMouseLeave={(e) => e.currentTarget.querySelector('.delete-icon').classList.add('hidden')}
-                className="cursor-pointer hover:bg-gray-700 p-2 rounded-md flex justify-between items-center"
-              >
-                <span onClick={() => showRecipeDetails(recipe)}>
-                  {recipe.recipeName}
-                </span>
-                <FaTrash 
-                  className="delete-icon hidden text-red-500 hover:text-red-700 transition duration-200 cursor-pointer"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemoveClick(recipe.recipeName);
-                  }}
-                />
-              </div>
-            ))}
+            {favourites.length > 0 ? (
+              favourites.map((recipe, index) => (
+                <div 
+                  key={index} 
+                  onMouseEnter={(e) => e.currentTarget.querySelector('.delete-icon').classList.remove('hidden')}
+                  onMouseLeave={(e) => e.currentTarget.querySelector('.delete-icon').classList.add('hidden')}
+                  className="cursor-pointer hover:bg-gray-700 p-2 rounded-md flex justify-between items-center"
+                >
+                  <span onClick={() => showRecipeDetails(recipe)}>
+                    {recipe.recipeName}
+                  </span>
+                  <FaTrash 
+                    className="delete-icon hidden text-red-500 hover:text-red-700 transition duration-200 cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveClick(recipe.recipeName);
+                    }}
+                  />
+                </div>
+              ))
+            ) : (
+              <p>Start adding some recipes to your favourites list</p>
+            )}
           </div>
         ) : (
           <div>AI Content</div>
@@ -163,7 +168,7 @@ const Sidebar = ({ isOpen, toggleSidebar, activeTab, setActiveTab }) => {
 
       {recipeToDelete && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white text-black p-4 rounded-lg w-1/3">
+          <div className="bg-white text-black p-4 rounded-lg w-11/12">
             <h3 className="font-bold mb-4">Confirm Deletion</h3>
             <p>Are you sure you want to delete the recipe: {recipeToDelete}?</p>
             <div className="flex justify-end mt-4">
