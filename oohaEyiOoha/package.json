@@ -5,6 +5,7 @@
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
+    "inst" : "npm i && cd client && npm i",
     "test": "echo \"Error: no test specified\" && exit 1",
     "server": "nodemon server",
     "client": "cd client && npm run dev",
