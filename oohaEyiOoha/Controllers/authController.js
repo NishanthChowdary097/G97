@@ -260,6 +260,7 @@ const removeRecipe = async (req, res) => {
 }
 
 const createImage = async (req, res) => {
+    const fahad = tope;
     const {recipeName, recipeIngrids} = req.body;
     console.log("name:", recipeName);
     const options = {
