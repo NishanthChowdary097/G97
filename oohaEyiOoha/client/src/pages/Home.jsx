@@ -36,9 +36,9 @@ const Home = () => {
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
       />
-      <div className={`flex-1 flex flex-col ${sidebarOpen ? 'ml-64 lg:ml-80' : ''} transition-all duration-300`}>
+      <div className={`flex-1 flex flex-col ${sidebarOpen ? 'ml-60 lg:ml-80' : ''} transition-all duration-300`}>
         <Navbar toggleSidebar={toggleSidebar} />
-        <MainContent ingredients={ingredients} openAiTab={openAiTab} sidebarOpen={sidebarOpen} />
+        <MainContent ingredients={ingredients} openAiTab={openAiTab} sidebarOpen={sidebarOpen} className=''/>
       </div>
     </div>
   );
