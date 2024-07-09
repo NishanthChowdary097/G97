@@ -17,4 +17,5 @@ let adminSchema=new mongoose.Schema({
 
 let admin = new mongoose.model('users',adminSchema);
 
+
 module.exports= {recipe};
