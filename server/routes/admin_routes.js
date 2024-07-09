@@ -1,4 +1,7 @@
 const express = require("express")
 const route = express.Router();
-const {recipe,user,admin}=require("../schema/schema");
+const {admin}=require("../schema/adminschema");
 
+route.get("/resipes",(req,res)=>{
+    res.send("admin");
+})

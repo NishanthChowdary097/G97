@@ -83,7 +83,7 @@ app.post('/login',async(req,res)=>{
 })
 
 app.use('/v2',auth,routes);
-
+app.use('/v3',auth,admin);
 async function auth (req, res, next){
     var token = req.header('Authorization');
     if (!token) return res.status(401).json({erroe:true, msg: 'unauthorized' });
