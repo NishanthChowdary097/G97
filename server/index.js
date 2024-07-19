@@ -9,6 +9,7 @@ const port=process.env.PORT;
 
 const {_,user} = require("./schema/schema");
 const routes = require("./routes/routes");
+const admin = require("./routes/admin_routes");
 
 app.use(express.json())
 
