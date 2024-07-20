@@ -165,7 +165,7 @@ const fetchRecipes = async (req, res) => {
                 'Potatoes',
                 'Beef broth',
                 'Tomato paste',
-                'Seasonings (salt, pepper, etc.)',
+                'Seasonings',
             ]
         },
         {
@@ -220,7 +220,7 @@ const starRecipe = async (req, res) => {
 
         const existingRecipe = await Fav.findOne({ recipeName: name });
         if (existingRecipe) {
-            return res.status(400).json({ warning: 'Recipe already exists in favourites. Please refresh the sidebar' });
+            return res.status(400).json({ warning: 'Recipe already exists in favourites.' });
         }
 
         const newFavourite = {
@@ -260,7 +260,6 @@ const removeRecipe = async (req, res) => {
 }
 
 const createImage = async (req, res) => {
-    const fahad = tope;
     const {recipeName, recipeIngrids} = req.body;
     console.log("name:", recipeName);
     const options = {
