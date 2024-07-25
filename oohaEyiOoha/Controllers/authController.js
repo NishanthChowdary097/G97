@@ -1,9 +1,28 @@
 const Ing = require("../Models/IngModel.js")
 const Fav = require("../Models/FavModel.js")
 const axios = require('axios');
+const bcrypt = require('bcrypt');
 
 
 
+
+const hashPassword = async (password) => {
+    const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(password, salt)
+        return hashedPassword;
+}
+
+
+const register = async(req, res) => {
+    const hashedPassword = await hashPassword(req.body.password)
+    req.body.password = hashedPassword
+    const user = await User.create(req.body)
+    res.status(StatusCodes.CREATED).json({msg : "user created"})
+}
+
+const login = async(req, res) => {
+
+}
 
 
 const getAllIngs = async (req, res) => {
