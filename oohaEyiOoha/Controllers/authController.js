@@ -1,9 +1,28 @@
 const Ing = require("../Models/IngModel.js")
 const Fav = require("../Models/FavModel.js")
 const axios = require('axios');
+const bcrypt = require('bcrypt');
 
 
 
+
+const hashPassword = async (password) => {
+    const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(password, salt)
+        return hashedPassword;
+}
+
+
+const register = async(req, res) => {
+    const hashedPassword = await hashPassword(req.body.password)
+    req.body.password = hashedPassword
+    const user = await User.create(req.body)
+    res.status(StatusCodes.CREATED).json({msg : "user created"})
+}
+
+const login = async(req, res) => {
+
+}
 
 
 const getAllIngs = async (req, res) => {
@@ -165,7 +184,7 @@ const fetchRecipes = async (req, res) => {
                 'Potatoes',
                 'Beef broth',
                 'Tomato paste',
-                'Seasonings (salt, pepper, etc.)',
+                'Seasonings',
             ]
         },
         {
@@ -220,7 +239,7 @@ const starRecipe = async (req, res) => {
 
         const existingRecipe = await Fav.findOne({ recipeName: name });
         if (existingRecipe) {
-            return res.status(400).json({ warning: 'Recipe already exists in favourites. Please refresh the sidebar' });
+            return res.status(400).json({ warning: 'Recipe already exists in favourites.' });
         }
 
         const newFavourite = {
@@ -260,7 +279,6 @@ const removeRecipe = async (req, res) => {
 }
 
 const createImage = async (req, res) => {
-    const fahad = tope;
     const {recipeName, recipeIngrids} = req.body;
     console.log("name:", recipeName);
     const options = {

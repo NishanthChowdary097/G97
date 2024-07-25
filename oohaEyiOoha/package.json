@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "inst" : "npm i && cd client && npm i",
+    "inst": "npm i && cd client && npm i",
     "test": "echo \"Error: no test specified\" && exit 1",
     "server": "nodemon server",
     "client": "cd client && npm run dev",
@@ -16,6 +16,8 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^1.7.2",
+    "bcrypt": "^5.1.1",
+    "boxicons": "^2.1.4",
     "concurrently": "^8.2.2",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",

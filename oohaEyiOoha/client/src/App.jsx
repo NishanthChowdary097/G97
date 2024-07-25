@@ -4,9 +4,9 @@ import {
   HomeLayout,
   Home,
   Error,
+  Login
 } from './pages'
 
-// import {loader as ingLoader} from './components/Maincontent';
 
 const router = createBrowserRouter([
   {
@@ -17,21 +17,11 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <Home />,
-        // action: homeAction,
-        // loader: ingLoader
+      },
+      {
+        path: 'login',
+        element: <Login />
       }
-      // {
-      //   path: 'units/:subjectId',
-      //   element: <Units />
-      // },
-      // {
-      //   path: 'topics/:unitId',
-      //   element: <Topics />
-      // }, 
-      // {
-      //   path: 'solve/:topicId',
-      //   element: <Solve />
-      // }
     ]
   }
 ])
