@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import Button from './Button';
 import image from '../assets/cgnlg.png';
 import drink from '../assets/healthy-drink.png'
+import { UILoader } from '../Loaders/ui-loader';
 
 const MainContent = ({ ingredients, isUserLoggedIn }) => {
   const [searchInput, setSearchInput] = useState('');
@@ -19,6 +20,7 @@ const MainContent = ({ ingredients, isUserLoggedIn }) => {
   const [loadingImages, setLoadingImages] = useState({});
   const [favorites, setFavorites] = useState([]);
   const [showSignInModal, setShowSignInModal] = useState(false);
+  const [loading, setLoading] = useState(false); // Add loading state
   const [showSignupOverlay, setShowSignupOverlay] = useState(false);
 
   const requestQueue = useRef([]);
@@ -29,9 +31,11 @@ const MainContent = ({ ingredients, isUserLoggedIn }) => {
     setSearchInput(input);
     if (input) {
       setSuggestions(
-        ingredients.filter((ingredient) =>
-          ingredient.toLowerCase().includes(input.toLowerCase())
-        ).slice(0, 10) // Limit to a maximum of 10 suggestions
+        ingredients
+          .filter((ingredient) =>
+            ingredient.toLowerCase().includes(input.toLowerCase())
+          )
+          .slice(0, 10) // Limit to a maximum of 10 suggestions
       );
     } else {
       setSuggestions([]);
@@ -64,6 +68,7 @@ const MainContent = ({ ingredients, isUserLoggedIn }) => {
       setShowSignupOverlay(true);
       return;
     }
+    setLoading(true); // Set loading to true before starting the fetch
 
     try {
       const response = await customFetch.post('/auth/fetchRecipes', {
@@ -76,12 +81,14 @@ const MainContent = ({ ingredients, isUserLoggedIn }) => {
         requestQueue.current.push({ recipeName: recipe.name, index });
       });
 
-      processQueue()
+      processQueue();
 
       setResponseMessage('');
     } catch (e) {
       console.error('Failed to fetch recipes:', e.message);
       setResponseMessage('');
+    } finally {
+      setLoading(false); // Set loading to false after fetch completes
     }
   };
 
@@ -91,7 +98,9 @@ const MainContent = ({ ingredients, isUserLoggedIn }) => {
     processingQueue.current = true;
     const batch = requestQueue.current.splice(0, 5);
 
-    await Promise.all(batch.map(({ recipeName, index }) => generateImage(recipeName, index)));
+    await Promise.all(
+      batch.map(({ recipeName, index }) => generateImage(recipeName, index))
+    );
 
     processingQueue.current = false;
 
@@ -103,7 +112,9 @@ const MainContent = ({ ingredients, isUserLoggedIn }) => {
   const generateImage = async (recipeName, index) => {
     setLoadingImages((prev) => ({ ...prev, [index]: true }));
     try {
-      const response = await customFetch.post('/auth/createImage', { recipeName });
+      const response = await customFetch.post('/auth/createImage', {
+        recipeName,
+      });
       setRecipes((prev) => {
         const updatedRecipes = [...prev];
         updatedRecipes[index].image = response.data.generated_image;
@@ -135,12 +146,16 @@ const MainContent = ({ ingredients, isUserLoggedIn }) => {
     }
     try {
       const { name, steps, ingredients } = recipe;
-      const response = await customFetch.post('/auth/history', { name, steps, ingredients });
-      toast.success("History updated. \n Refresh to view")
+      const response = await customFetch.post('/auth/history', {
+        name,
+        steps,
+        ingredients,
+      });
+      toast.success('History updated. \n Refresh to view');
     } catch (e) {
-      console.error("Error:", e);
+      console.error('Error:', e);
     }
-  }
+  };
 
   const starRecipe = async (recipe) => {
     if (!isUserLoggedIn) {
@@ -149,7 +164,11 @@ const MainContent = ({ ingredients, isUserLoggedIn }) => {
     }
     try {
       const { name, steps, ingredients } = recipe;
-      const response = await customFetch.post('/auth/starRecipe', { name, steps, ingredients });
+      const response = await customFetch.post('/auth/starRecipe', {
+        name,
+        steps,
+        ingredients,
+      });
 
       if (response.status === 200) {
         toast.success(`${response.data.message}\nPlease refresh your sidebar`);
@@ -158,7 +177,11 @@ const MainContent = ({ ingredients, isUserLoggedIn }) => {
         toast.error(response.data);
       }
     } catch (error) {
-      toast.error(`${error.response?.data?.warning || 'Failed to star recipe'}\nPlease refresh your sidebar`);
+      toast.error(
+        `${
+          error.response?.data?.warning || 'Failed to star recipe'
+        }\nPlease refresh your sidebar`
+      );
     }
   };
 
@@ -168,9 +191,15 @@ const MainContent = ({ ingredients, isUserLoggedIn }) => {
         <div className="mb-4">
           <div className="relative flex flex-wrap items-center border-2 border-orange-900 bg-orange-100 rounded-full p-1">
             {selectedTags.map((tag, index) => (
-              <div key={index} className="bg-orange-300 ml-1 px-2 py-1 rounded-full border border-black mr-2 flex items-center">
+              <div
+                key={index}
+                className="bg-orange-300 ml-1 px-2 py-1 rounded-full border border-black mr-2 flex items-center"
+              >
                 {tag}
-                <button onClick={() => removeTag(tag)} className="ml-1 text-red-600">
+                <button
+                  onClick={() => removeTag(tag)}
+                  className="ml-1 text-red-600"
+                >
                   &times;
                 </button>
               </div>
@@ -208,10 +237,17 @@ const MainContent = ({ ingredients, isUserLoggedIn }) => {
             <p>{responseMessage}</p>
           </div>
         )}
-        {recipes.length === 0 && (
+         {loading ? ( // Show UILoader when loading is true
+          <UILoader />):recipes.length === 0 && (
           <div className="flex flex-col items-center mt-20">
-            <img src={drink} alt="Choose ingredients" className=" mt-20 w-1/6   h-auto" />
-            <p className="mt-4 text-2xl text-orange-900 font-bold">Choose ingredients to view recipes !</p>
+            <img
+              src={drink}
+              alt="Choose ingredients"
+              className=" mt-20 w-1/6   h-auto"
+            />
+            <p className="mt-4 text-2xl text-orange-900 font-bold">
+              Choose ingredients to view recipes !
+            </p>
           </div>
         )}
         {recipes.length > 0 && (
@@ -220,8 +256,9 @@ const MainContent = ({ ingredients, isUserLoggedIn }) => {
               <IonCard
                 key={index}
                 onClick={() => handleRecipeClick(recipe)}
-                className={`relative border-2 border-orange-900 p-4 ${isUserLoggedIn ? '' : 'blur-lg cursor-not-allowed'
-                  } bg-transparent hover:bg-orange-400 shadow-md shadow-black hover:border-4 hover:font-bold hover:text-white backdrop-filter backdrop-blur-md bg-opacity-30 transition-all duration-300 ease-in-out`}
+                className={`relative border-2 border-orange-900 p-4 ${
+                  isUserLoggedIn ? '' : 'blur-lg cursor-not-allowed'
+                } bg-transparent hover:bg-orange-400 shadow-md shadow-black hover:border-4 hover:font-bold hover:text-white backdrop-filter backdrop-blur-md bg-opacity-30 transition-all duration-300 ease-in-out`}
               >
                 <div className="absolute top-2 left-2 ">
                   <button
@@ -250,69 +287,76 @@ const MainContent = ({ ingredients, isUserLoggedIn }) => {
                 <div className="mt-1 border-orange-900">
                   <div className="border-t-4 border-orange-950"></div>
                   <IonCardHeader>
-                    <IonCardTitle className="text-xl font-extrabold">{recipe.name}</IonCardTitle>
+                    <IonCardTitle className="text-xl font-extrabold">
+                      {recipe.name}
+                    </IonCardTitle>
                   </IonCardHeader>
                 </div>
               </IonCard>
             ))}
           </div>
         )}
-  {selectedRecipe && (
-  <div
-    className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-    onClick={(e) => {
-      closeRecipeModal();
-      addHistory(selectedRecipe);
-    }}
-    role="dialog"
-    aria-labelledby="recipe-title"
-    aria-modal="true"
-  >
-    <div
-      className="bg-orange-100 p-8 rounded-2xl shadow-black shadow-xl max-w-lg w-full relative h-3/4 overflow-y-auto"
-      onClick={(e) => { e.stopPropagation(); addHistory(selectedRecipe); }}
-    >
-      <button
-        onClick={closeRecipeModal}
-        className="absolute text-3xl top-4 right-4 text-gray-600 hover:text-gray-800"
-      >
-        &times;
-      </button>
-      <div className="absolute top-2 left-2">
-        <button
-          className="bg-orange-950 text-orange-50 rounded-full p-2 shadow-lg hover:bg-orange-50 hover:text-orange-950 transition duration-200"
-          onClick={(e) => {
-            e.stopPropagation();
-            starRecipe(selectedRecipe);
-          }}
-        >
-          <FaStar />
-        </button>
-      </div>
-      <h3 id="recipe-title" className="text-2xl font-bold mb-4">
-        {selectedRecipe.name}
-      </h3>
-      <div className="flex flex-wrap gap-2 mb-4">
-        {selectedRecipe.ingredients.map((ingredient, index) => (
+        {selectedRecipe && (
           <div
-            key={index}
-            className="flex items-center justify-center bg-orange-300 px-2 py-1 rounded border border-orange-400 hover:border-orange-950 hover:bg-orange-300"
+            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+            onClick={(e) => {
+              closeRecipeModal();
+              addHistory(selectedRecipe);
+            }}
+            role="dialog"
+            aria-labelledby="recipe-title"
+            aria-modal="true"
           >
-            {ingredient}
+            <div
+              className="bg-orange-100 p-8 rounded-2xl shadow-black shadow-xl max-w-lg w-full relative h-3/4 overflow-y-auto"
+              onClick={(e) => {
+                e.stopPropagation();
+                addHistory(selectedRecipe);
+              }}
+            >
+              <button
+                onClick={closeRecipeModal}
+                className="absolute text-3xl top-4 right-4 text-gray-600 hover:text-gray-800"
+              >
+                &times;
+              </button>
+              <div className="absolute top-2 left-2">
+                <button
+                  className="bg-orange-950 text-orange-50 rounded-full p-2 shadow-lg hover:bg-orange-50 hover:text-orange-950 transition duration-200"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    starRecipe(selectedRecipe);
+                  }}
+                >
+                  <FaStar />
+                </button>
+              </div>
+              <h3 id="recipe-title" className="text-2xl font-bold mb-4">
+                {selectedRecipe.name}
+              </h3>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {selectedRecipe.ingredients.map((ingredient, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-center bg-orange-300 px-2 py-1 rounded border border-orange-400 hover:border-orange-950 hover:bg-orange-300"
+                  >
+                    {ingredient}
+                  </div>
+                ))}
+              </div>
+              <h4 className="font-bold mb-1 text-xl border-t-4 border-orange-900">
+                Steps:
+              </h4>
+              <div>
+                {selectedRecipe.steps.map((step, index) => (
+                  <div className="mb-1" key={index}>
+                    {step}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        ))}
-      </div>
-      <h4 className="font-bold mb-1 text-xl border-t-4 border-orange-900">Steps:</h4>
-      <div>
-        {selectedRecipe.steps.map((step, index) => (
-          <div className="mb-1" key={index}>{step}</div>
-        ))}
-      </div>
-    </div>
-  </div>
-)}
-
-
+        )}
 
         {showSignupOverlay && (
           <div
@@ -328,12 +372,14 @@ const MainContent = ({ ingredients, isUserLoggedIn }) => {
                 alt="Sign Up"
                 className=" w-full h-auto object-cover mb-4 border-b-4 border-orange-900"
               />
-              <div className='flex items-start rounded-md mt-10 shadow-md shadow-amber-900 text-amber-700 font-bold bg-amber-100'>
-                <FaInfoCircle className='text-2xl mt-4 ml-4'/>
-                <p className='py-4 px-2'>Please Sign Up to view the recipes !</p>
+              <div className="flex items-start rounded-md mt-10 shadow-md shadow-amber-900 text-amber-700 font-bold bg-amber-100">
+                <FaInfoCircle className="text-2xl mt-4 ml-4" />
+                <p className="py-4 px-2">
+                  Please Sign Up to view the recipes !
+                </p>
               </div>
               <div className="flex justify-center gap-8 mt-10">
-                <div className='z-0 p-1 rounded-full'>
+                <div className="z-0 p-1 rounded-full">
                   <Link to="/login">
                     <Button
                       title="Sign In"
@@ -341,7 +387,7 @@ const MainContent = ({ ingredients, isUserLoggedIn }) => {
                     />
                   </Link>
                 </div>
-                <div className='z-0  p-1 rounded-full'>
+                <div className="z-0  p-1 rounded-full">
                   <Link to="/register">
                     <Button
                       title="Sign Up"
