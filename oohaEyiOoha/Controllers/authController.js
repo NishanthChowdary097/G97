@@ -289,7 +289,7 @@ const fetchRecipes = async (req, res) => {
     const data = { ingredients };
 
     try {
-        const requests = Array(1).fill().map(() => axios.post(url, data));
+        const requests = Array(5).fill().map(() => axios.post(url, data));
         const responses = await Promise.all(requests);
 
         const recipes = responses.map(response => response.data.recipe);

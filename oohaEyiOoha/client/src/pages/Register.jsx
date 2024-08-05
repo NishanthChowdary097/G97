@@ -185,14 +185,9 @@ const Login = () => {
       });
 
       const data = await response.json();
-      if (response.ok) {
         toast.success(data.msg);
         console.log('Login successful:', data);
         navigate('/home');
-      } else {
-        toast.error(data.message);
-        console.error('Login failed:', data);
-      }
     } catch (error) {
       console.error('Error:', error);
     }

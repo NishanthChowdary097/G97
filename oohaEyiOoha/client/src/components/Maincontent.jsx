@@ -81,7 +81,7 @@ const MainContent = ({ ingredients, isUserLoggedIn }) => {
       setResponseMessage('');
     } catch (e) {
       console.error('Failed to fetch recipes:', e.message);
-      setResponseMessage('Failed to fetch recipes');
+      setResponseMessage('');
     }
   };
 
@@ -257,60 +257,62 @@ const MainContent = ({ ingredients, isUserLoggedIn }) => {
             ))}
           </div>
         )}
-        {selectedRecipe && (
+  {selectedRecipe && (
+  <div
+    className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+    onClick={(e) => {
+      closeRecipeModal();
+      addHistory(selectedRecipe);
+    }}
+    role="dialog"
+    aria-labelledby="recipe-title"
+    aria-modal="true"
+  >
+    <div
+      className="bg-orange-100 p-8 rounded-2xl shadow-black shadow-xl max-w-lg w-full relative h-3/4 overflow-y-auto"
+      onClick={(e) => { e.stopPropagation(); addHistory(selectedRecipe); }}
+    >
+      <button
+        onClick={closeRecipeModal}
+        className="absolute text-3xl top-4 right-4 text-gray-600 hover:text-gray-800"
+      >
+        &times;
+      </button>
+      <div className="absolute top-2 left-2">
+        <button
+          className="bg-orange-950 text-orange-50 rounded-full p-2 shadow-lg hover:bg-orange-50 hover:text-orange-950 transition duration-200"
+          onClick={(e) => {
+            e.stopPropagation();
+            starRecipe(selectedRecipe);
+          }}
+        >
+          <FaStar />
+        </button>
+      </div>
+      <h3 id="recipe-title" className="text-2xl font-bold mb-4">
+        {selectedRecipe.name}
+      </h3>
+      <div className="flex flex-wrap gap-2 mb-4">
+        {selectedRecipe.ingredients.map((ingredient, index) => (
           <div
-            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-            onClick={(e) => {
-              closeRecipeModal();
-              addHistory(selectedRecipe);
-            }}
-            role="dialog"
-            aria-labelledby="recipe-title"
-            aria-modal="true"
+            key={index}
+            className="flex items-center justify-center bg-orange-300 px-2 py-1 rounded border border-orange-400 hover:border-orange-950 hover:bg-orange-300"
           >
-            <div
-              className="bg-orange-100 p-8 rounded-2xl shadow-black shadow-xl max-w-lg w-full relative"
-              onClick={(e) => { e.stopPropagation(); addHistory(selectedRecipe) }}
-            >
-              <button
-                onClick={closeRecipeModal}
-                className="absolute text-3xl top-4 right-4 text-gray-600 hover:text-gray-800"
-              >
-                &times;
-              </button>
-              <div className="absolute top-2 left-2">
-                <button
-                  className="bg-orange-950 text-orange-50 rounded-full p-2 shadow-lg hover:bg-orange-50 hover:text-orange-950 transition duration-200"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    starRecipe(selectedRecipe);
-                  }}
-                >
-                  <FaStar />
-                </button>
-              </div>
-              <h3 id="recipe-title" className="text-2xl font-bold mb-4">
-                {selectedRecipe.name}
-              </h3>
-              <div className="flex flex-wrap gap-2 mb-4">
-                {selectedRecipe.ingredients.map((ingredient, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-center bg-orange-300 px-2 py-1 rounded border border-orange-400 hover:border-orange-950 hover:bg-orange-300"
-                  >
-                    {ingredient}
-                  </div>
-                ))}
-              </div>
-              <h4 className="font-bold mb-1 text-xl border-t-4 border-orange-900">Steps:</h4>
-              <ol className="list-decimal list-inside">
-                {selectedRecipe.steps.map((step, index) => (
-                  <li className="mb-1" key={index}>{step}</li>
-                ))}
-              </ol>
-            </div>
+            {ingredient}
           </div>
-        )}
+        ))}
+      </div>
+      <h4 className="font-bold mb-1 text-xl border-t-4 border-orange-900">Steps:</h4>
+      <div>
+        {selectedRecipe.steps.map((step, index) => (
+          <div className="mb-1" key={index}>{step}</div>
+        ))}
+      </div>
+    </div>
+  </div>
+)}
+
+
 
         {showSignupOverlay && (
           <div

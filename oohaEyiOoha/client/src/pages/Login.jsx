@@ -2,9 +2,8 @@ import React from 'react';
 import styled from 'styled-components';
 import backgroundImage from '../assets/mg.png';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify'
-import logo from '../assets/edokati.png'
-
+import { toast } from 'react-toastify';
+import logo from '../assets/edokati.png';
 
 const Container = styled.div`
   background-color: transparent; 
@@ -71,8 +70,6 @@ const Input = styled.input`
   width: 100%;
 `;
 
-
-
 const Button = styled.button`
   border-radius: 20px;  
   background-color: rgba(67, 20, 7, 1); 
@@ -101,6 +98,7 @@ const Anchor = styled.a`
   font-size: 14px;
   text-decoration: none;
   margin: 15px 0;
+  cursor: pointer;
 `;
 
 const OverlayContainer = styled.div`
@@ -188,14 +186,9 @@ const Login = () => {
       });
 
       const data = await response.json();
-      if (response.ok) {
-        toast.success(data.msg)
-        console.log('Login successful:', data);
-        navigate('/home');
-      } else {
-        toast.error(data.message);
-        console.error('Login failed:', data);
-      }
+      toast.success(data.msg);
+      console.log('Login successful:', data);
+      navigate('/home');
     } catch (error) {
       console.error('Error:', error);
     }
@@ -224,12 +217,16 @@ const Login = () => {
         navigate('/login');
         console.log('Registration successful:', data);
       } else {
-        // Handle registration errors
         console.error('Registration failed:', data);
       }
     } catch (error) {
       console.error('Error:', error);
     }
+  };
+
+  const handleForgotPassword = (event) => {
+    event.preventDefault();
+    toast.error("Cheem Tapaka Dum Dum ");
   };
 
   return (
@@ -269,7 +266,7 @@ const Login = () => {
               <Title className='title'>Log In </Title>
               <Input type="email" name="email" placeholder='Email' required />
               <Input type="password" name="password" placeholder='Password' required />
-              <Anchor href='#'>Forgot your password?</Anchor>
+              <Anchor href='#' onClick={handleForgotPassword}>Forgot your password?</Anchor>
               <Button type="submit">Sign In</Button>
             </Form>
           </SignInContainer>
