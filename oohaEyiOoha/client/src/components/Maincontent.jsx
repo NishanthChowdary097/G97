@@ -21,7 +21,7 @@ const MainContent = ({ ingredients, isUserLoggedIn }) => {
   const [favorites, setFavorites] = useState([]);
   const [showSignInModal, setShowSignInModal] = useState(false);
   const [loading, setLoading] = useState(false); // Add loading state
-  const [showSignupOverlay, setShowSignupOverlay] = useState(true);
+  const [showSignupOverlay, setShowSignupOverlay] = useState(false);
 
   const requestQueue = useRef([]);
   const processingQueue = useRef(false);
@@ -88,7 +88,7 @@ const MainContent = ({ ingredients, isUserLoggedIn }) => {
       console.error('Failed to fetch recipes:', e.message);
       setResponseMessage('');
     } finally {
-      setLoading(true); // Set loading to false after fetch completes
+      setLoading(false); // Set loading to false after fetch completes
     }
   };
 
