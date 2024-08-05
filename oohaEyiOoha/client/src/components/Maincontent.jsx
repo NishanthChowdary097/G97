@@ -1,11 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { IonCard, IonCardHeader, IonCardTitle } from '@ionic/react';
-import { FaRobot, FaStar, FaRegStar } from 'react-icons/fa';
+import { FaInfoCircle, FaStar, FaSearch } from 'react-icons/fa';
+import temp from '../assets/temp.svg';
+import { Link } from 'react-router-dom';
 import customFetch from '../../../utils/customFetch';
 import { toast } from 'react-toastify';
+import Button from './Button';
+import image from '../assets/cgnlg.png';
+import drink from '../assets/healthy-drink.png'
+import { UILoader } from '../Loaders/ui-loader';
 
-
-const MainContent = ({ ingredients, openAiTab }) => {
+const MainContent = ({ ingredients, isUserLoggedIn }) => {
   const [searchInput, setSearchInput] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
@@ -14,6 +19,9 @@ const MainContent = ({ ingredients, openAiTab }) => {
   const [responseMessage, setResponseMessage] = useState('');
   const [loadingImages, setLoadingImages] = useState({});
   const [favorites, setFavorites] = useState([]);
+  const [showSignInModal, setShowSignInModal] = useState(false);
+  const [loading, setLoading] = useState(false); // Add loading state
+  const [showSignupOverlay, setShowSignupOverlay] = useState(false);
 
   const requestQueue = useRef([]);
   const processingQueue = useRef(false);
@@ -23,9 +31,11 @@ const MainContent = ({ ingredients, openAiTab }) => {
     setSearchInput(input);
     if (input) {
       setSuggestions(
-        ingredients.filter((ingredient) =>
-          ingredient.toLowerCase().includes(input.toLowerCase())
-        )
+        ingredients
+          .filter((ingredient) =>
+            ingredient.toLowerCase().includes(input.toLowerCase())
+          )
+          .slice(0, 10) // Limit to a maximum of 10 suggestions
       );
     } else {
       setSuggestions([]);
@@ -33,10 +43,12 @@ const MainContent = ({ ingredients, openAiTab }) => {
   };
 
   const handleSuggestionClick = (ingredient) => {
-    if (selectedTags.length < 3 && !selectedTags.includes(ingredient)) {
+    if (selectedTags.length < 5 && !selectedTags.includes(ingredient)) {
       setSelectedTags([...selectedTags, ingredient]);
       setSearchInput('');
       setSuggestions([]);
+    } else {
+      toast.error('Select UNIQUE ingredients less than 5');
     }
   };
 
@@ -46,9 +58,17 @@ const MainContent = ({ ingredients, openAiTab }) => {
 
   const handleSearchClick = async () => {
     if (selectedTags.length === 0) {
-      setResponseMessage('Please add at least one ingredient.');
+      toast.error('Please add at least one ingredient');
       return;
     }
+
+    if (!isUserLoggedIn) {
+      // Show toast message and open sign-up overlay
+      toast.info('Please sign in or sign up to fetch recipes');
+      setShowSignupOverlay(true);
+      return;
+    }
+    setLoading(true); // Set loading to true before starting the fetch
 
     try {
       const response = await customFetch.post('/auth/fetchRecipes', {
@@ -57,18 +77,18 @@ const MainContent = ({ ingredients, openAiTab }) => {
       const fetchedRecipes = response.data.recipes;
       setRecipes(fetchedRecipes);
 
-      // Add image generation requests to the queue
       fetchedRecipes.forEach((recipe, index) => {
         requestQueue.current.push({ recipeName: recipe.name, index });
       });
 
-      // Start processing the queue
       processQueue();
 
       setResponseMessage('');
     } catch (e) {
       console.error('Failed to fetch recipes:', e.message);
-      setResponseMessage('Failed to fetch recipes');
+      setResponseMessage('');
+    } finally {
+      setLoading(false); // Set loading to false after fetch completes
     }
   };
 
@@ -76,9 +96,11 @@ const MainContent = ({ ingredients, openAiTab }) => {
     if (processingQueue.current || requestQueue.current.length === 0) return;
 
     processingQueue.current = true;
-    const batch = requestQueue.current.splice(0, 3);
+    const batch = requestQueue.current.splice(0, 5);
 
-    await Promise.all(batch.map(({ recipeName, index }) => generateImage(recipeName, index)));
+    await Promise.all(
+      batch.map(({ recipeName, index }) => generateImage(recipeName, index))
+    );
 
     processingQueue.current = false;
 
@@ -90,7 +112,9 @@ const MainContent = ({ ingredients, openAiTab }) => {
   const generateImage = async (recipeName, index) => {
     setLoadingImages((prev) => ({ ...prev, [index]: true }));
     try {
-      const response = await customFetch.post('/auth/createImage', { recipeName });
+      const response = await customFetch.post('/auth/createImage', {
+        recipeName,
+      });
       setRecipes((prev) => {
         const updatedRecipes = [...prev];
         updatedRecipes[index].image = response.data.generated_image;
@@ -104,17 +128,47 @@ const MainContent = ({ ingredients, openAiTab }) => {
   };
 
   const handleRecipeClick = (recipe) => {
-    setSelectedRecipe(recipe);
+    if (isUserLoggedIn) {
+      setSelectedRecipe(recipe);
+    } else {
+      setShowSignInModal(true);
+    }
   };
 
   const closeRecipeModal = () => {
     setSelectedRecipe(null);
   };
 
-  const starRecipe = async (recipe) => {
+  const addHistory = async (recipe) => {
+    if (!isUserLoggedIn) {
+      setShowSignInModal(true);
+      return;
+    }
     try {
       const { name, steps, ingredients } = recipe;
-      const response = await customFetch.post('/auth/starRecipe', { name, steps, ingredients });
+      const response = await customFetch.post('/auth/history', {
+        name,
+        steps,
+        ingredients,
+      });
+      toast.success('History updated. \n Refresh to view');
+    } catch (e) {
+      console.error('Error:', e);
+    }
+  };
+
+  const starRecipe = async (recipe) => {
+    if (!isUserLoggedIn) {
+      setShowSignInModal(true);
+      return;
+    }
+    try {
+      const { name, steps, ingredients } = recipe;
+      const response = await customFetch.post('/auth/starRecipe', {
+        name,
+        steps,
+        ingredients,
+      });
 
       if (response.status === 200) {
         toast.success(`${response.data.message}\nPlease refresh your sidebar`);
@@ -123,139 +177,229 @@ const MainContent = ({ ingredients, openAiTab }) => {
         toast.error(response.data);
       }
     } catch (error) {
-      toast.error(`${error.response?.data?.warning || 'Failed to star recipe'}\nPlease refresh your sidebar`);
+      toast.error(
+        `${
+          error.response?.data?.warning || 'Failed to star recipe'
+        }\nPlease refresh your sidebar`
+      );
     }
   };
 
   return (
-    <div className="p-4 flex-1">
-      <div className="mb-4">
-        <div className="flex flex-wrap items-center border rounded p-2">
-          {selectedTags.map((tag, index) => (
-            <div key={index} className="bg-blue-200 px-2 py-1 rounded mr-2 mb-2 flex items-center">
-              {tag}
-              <button onClick={() => removeTag(tag)} className="ml-1 text-red-600">
-                &times;
-              </button>
-            </div>
-          ))}
-          <input
-            type="text"
-            value={searchInput}
-            onChange={handleInputChange}
-            placeholder="Search..."
-            className="flex-1 p-2 outline-none"
-          />
-        </div>
-        {suggestions.length > 0 && (
-          <ul className="border rounded mt-2 bg-white absolute z-10">
-            {suggestions.map((suggestion, index) => (
-              <li
+    <div className="relative p-4 flex-1 bg-orange-100">
+      <div className="relative z-10">
+        <div className="mb-4">
+          <div className="relative flex flex-wrap items-center border-2 border-orange-900 bg-orange-100 rounded-full p-1">
+            {selectedTags.map((tag, index) => (
+              <div
                 key={index}
-                onClick={() => handleSuggestionClick(suggestion)}
-                className="p-2 hover:bg-blue-100 cursor-pointer"
+                className="bg-orange-300 ml-1 px-2 py-1 rounded-full border border-black mr-2 flex items-center"
               >
-                {suggestion}
-              </li>
+                {tag}
+                <button
+                  onClick={() => removeTag(tag)}
+                  className="ml-1 text-red-600"
+                >
+                  &times;
+                </button>
+              </div>
             ))}
-          </ul>
-        )}
-      </div>
-      <button
-        onClick={handleSearchClick}
-        className="w-full md:w-auto px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-200"
-      >
-        Search
-      </button>
-      {responseMessage && (
-        <div className="mt-4">
-          <p>{responseMessage}</p>
-        </div>
-      )}
-      {recipes.length > 0 && (
-        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {recipes.map((recipe, index) => (
-            <IonCard
-              key={index}
-              onClick={() => handleRecipeClick(recipe)}
-              className="cursor-pointer relative shadow-gray-900 shadow-lg p-4 bg-gradient-to-b from-gray-200 to-gray-400 rounded-b-3xl hover:bg-gradient-to-top hover:rounded-t-md hover:from-orange-500 hover:to-amber-400 hover:font-bold hover:text-white "
-            >
-              <div className="absolute top-2 left-2">
-                <button
-                  className="bg-yellow-400 text-white rounded-full p-2 shadow-lg hover:bg-yellow-500 transition duration-200"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    starRecipe(recipe);
-                  }}
-                >
-                  {favorites.includes(recipe.name) ? <FaStar /> : <FaRegStar />}
-                </button>
-              </div>
-              {loadingImages[index] ? (
-                <div className="flex justify-center items-center h-60 w-full">
-                  <div className="loader">Loading...</div>
-                </div>
-              ) : (
-                <img
-                  alt="Recipe"
-                  src={recipe.image || "https://ionicframework.com/docs/img/demos/card-media.png"}
-                  className="h-60 w-full object-cover rounded-xl hover:border hover:border-black"
-                />
-              )}
-              <IonCardHeader>
-                <IonCardTitle className="text-xl font-extrabold hover:underline">{recipe.name}</IonCardTitle>
-              </IonCardHeader>
-              <div className="flex justify-between items-center mt-2">
-                <p className="text-sm text-gray-700 pr-8">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Repellendus, et cum deserunt iste officiis perferendis!</p>
-                <button
-                  className="absolute bottom-10 right-1 bg-gradient-to-b from-blue-500 to-purple-900 text-white rounded-full p-4 shadow-lg hover:bg-gradient-to-b hover:from-purple-950 hover:to-blue-600 transition duration-200"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openAiTab();
-                  }}
-                >
-                  <FaRobot />
-                </button>
-              </div>
-            </IonCard>
-          ))}
-        </div>
-      )}
-      {selectedRecipe && (
-        <div
-          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-          onClick={closeRecipeModal}
-        >
-          <div
-            className="bg-white p-8 rounded shadow-lg max-w-lg w-full relative"
-            onClick={(e) => e.stopPropagation()}
-          >
+            <input
+              type="text"
+              value={searchInput}
+              onChange={handleInputChange}
+              placeholder="Search..."
+              className="flex-1 py-2 px-4 outline-none bg-transparent"
+            />
             <button
-              onClick={closeRecipeModal}
-              className="absolute top-4 right-4 text-gray-600 hover:text-gray-800"
+              onClick={handleSearchClick}
+              className="border-l border-orange-900  icon-button p-2 px-3 mr-0 hover:bg-orange-200 hover:border-2 hover:border-orange-950 hover:rounded-full"
             >
-              &times;
+              <FaSearch className="text-3xl text-orange-950 " />
             </button>
-            <h3 className="font-bold mb-2 text-2xl">{selectedRecipe.name}</h3>
-            <div className="mb-4">
-              <h4 className="font-bold">Ingredients:</h4>
-              <ul>
-                {selectedRecipe.ingredients.map((ingredient, i) => (
-                  <li key={i}>{ingredient}</li>
-                ))}
-              </ul>
-            </div>
-            <h4 className="font-bold">Steps:</h4>
-            <ul className="list-disc list-inside">
-              {selectedRecipe.steps.map((step, index) => (
-                <li key={index} className="mb-2">
-                  {step}
+          </div>
+          {suggestions.length > 0 && (
+            <ul className="mt-3 bg-orange-100 w-60 absolute z-10 max-h-72 p-1 overflow-y-auto custom-scrollbar">
+              {suggestions.map((suggestion, index) => (
+                <li
+                  key={index}
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  className="border border-gray-200 hover:border-orange-950 p-1 py-2 bg-gray-300 hover:bg-orange-300 hover:border-2 text-center rounded cursor-pointer"
+                >
+                  {suggestion}
                 </li>
               ))}
             </ul>
-          </div>
+          )}
         </div>
-      )}
+        {responseMessage && (
+          <div className="mt-4">
+            <p>{responseMessage}</p>
+          </div>
+        )}
+         {loading ? ( // Show UILoader when loading is true
+          <UILoader />):recipes.length === 0 && (
+          <div className="flex flex-col items-center mt-20">
+            <img
+              src={drink}
+              alt="Choose ingredients"
+              className=" mt-20 w-1/6   h-auto"
+            />
+            <p className="mt-4 text-2xl text-orange-900 font-bold">
+              Choose ingredients to view recipes !
+            </p>
+          </div>
+        )}
+        {recipes.length > 0 && (
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {recipes.map((recipe, index) => (
+              <IonCard
+                key={index}
+                onClick={() => handleRecipeClick(recipe)}
+                className={`relative border-2 border-orange-900 p-4 ${
+                  isUserLoggedIn ? '' : 'blur-lg cursor-not-allowed'
+                } bg-transparent hover:bg-orange-400 shadow-md shadow-black hover:border-4 hover:font-bold hover:text-white backdrop-filter backdrop-blur-md bg-opacity-30 transition-all duration-300 ease-in-out`}
+              >
+                <div className="absolute top-2 left-2 ">
+                  <button
+                    className="bg-orange-950 shadow-black shadow-md text-orange-50 rounded-full p-2 hover:bg-orange-50 hover:text-orange-950 transition duration-200"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      starRecipe(recipe);
+                    }}
+                  >
+                    <FaStar />
+                  </button>
+                </div>
+                {loadingImages[index] ? (
+                  <div className="flex justify-center items-center w-full">
+                    <div className="loader">Loading...</div>
+                  </div>
+                ) : (
+                  <div className="image-container">
+                    <img
+                      alt="Recipe"
+                      src={recipe.image || temp}
+                      className="h-60 w-full object-cover rounded-sm border border-orange-950 hover:border-2"
+                    />
+                  </div>
+                )}
+                <div className="mt-1 border-orange-900">
+                  <div className="border-t-4 border-orange-950"></div>
+                  <IonCardHeader>
+                    <IonCardTitle className="text-xl font-extrabold">
+                      {recipe.name}
+                    </IonCardTitle>
+                  </IonCardHeader>
+                </div>
+              </IonCard>
+            ))}
+          </div>
+        )}
+        {selectedRecipe && (
+          <div
+            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+            onClick={(e) => {
+              closeRecipeModal();
+              addHistory(selectedRecipe);
+            }}
+            role="dialog"
+            aria-labelledby="recipe-title"
+            aria-modal="true"
+          >
+            <div
+              className="bg-orange-100 p-8 rounded-2xl shadow-black shadow-xl max-w-lg w-full relative h-3/4 overflow-y-auto"
+              onClick={(e) => {
+                e.stopPropagation();
+                addHistory(selectedRecipe);
+              }}
+            >
+              <button
+                onClick={closeRecipeModal}
+                className="absolute text-3xl top-4 right-4 text-gray-600 hover:text-gray-800"
+              >
+                &times;
+              </button>
+              <div className="absolute top-2 left-2">
+                <button
+                  className="bg-orange-950 text-orange-50 rounded-full p-2 shadow-lg hover:bg-orange-50 hover:text-orange-950 transition duration-200"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    starRecipe(selectedRecipe);
+                  }}
+                >
+                  <FaStar />
+                </button>
+              </div>
+              <h3 id="recipe-title" className="text-2xl font-bold mb-4">
+                {selectedRecipe.name}
+              </h3>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {selectedRecipe.ingredients.map((ingredient, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-center bg-orange-300 px-2 py-1 rounded border border-orange-400 hover:border-orange-950 hover:bg-orange-300"
+                  >
+                    {ingredient}
+                  </div>
+                ))}
+              </div>
+              <h4 className="font-bold mb-1 text-xl border-t-4 border-orange-900">
+                Steps:
+              </h4>
+              <div>
+                {selectedRecipe.steps.map((step, index) => (
+                  <div className="mb-1" key={index}>
+                    {step}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showSignupOverlay && (
+          <div
+            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+            onClick={() => setShowSignupOverlay(false)}
+          >
+            <div
+              className="relative max-w-md w-full p-4 bg-amber-50 shadow-black rounded-2xl shadow-lg"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img
+                src={image}
+                alt="Sign Up"
+                className=" w-full h-auto object-cover mb-4 border-b-4 border-orange-900"
+              />
+              <div className="flex items-start rounded-md mt-10 shadow-md shadow-amber-900 text-amber-700 font-bold bg-amber-100">
+                <FaInfoCircle className="text-2xl mt-4 ml-4" />
+                <p className="py-4 px-2">
+                  Please Sign Up to view the recipes !
+                </p>
+              </div>
+              <div className="flex justify-center gap-8 mt-10">
+                <div className="z-0 p-1 rounded-full">
+                  <Link to="/login">
+                    <Button
+                      title="Sign In"
+                      containerStyle="hover:font-bold hidden md:block bg-transparent border-orange-900 py-3 hover:scale-110 hover:shadow-md hover:shadow-black transition duration-200 font-bold text-gray-800 hover:bg-orange-200 hover:text-orange-950 rounded-full min-w-[130px]"
+                    />
+                  </Link>
+                </div>
+                <div className="z-0  p-1 rounded-full">
+                  <Link to="/register">
+                    <Button
+                      title="Sign Up"
+                      containerStyle="hover:font-bold hidden md:block bg-transparent py-3 border-orange-900 hover:scale-110 hover:shadow-md hover:shadow-black transition duration-200 font-bold text-gray-800 hover:bg-orange-200 hover:text-orange-950 rounded-full min-w-[130px]"
+                    />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

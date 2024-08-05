@@ -4,9 +4,11 @@ import {
   HomeLayout,
   Home,
   Error,
+  Login,
+  Register,
+  Landing
 } from './pages'
 
-// import {loader as ingLoader} from './components/Maincontent';
 
 const router = createBrowserRouter([
   {
@@ -15,23 +17,21 @@ const router = createBrowserRouter([
     errorElement: <Error />,
     children: [
       {
-        index: true,
+        path:'home',
         element: <Home />,
-        // action: homeAction,
-        // loader: ingLoader
+      },
+      {
+        path: 'login',
+        element: <Login />
+      },
+      {
+        path: 'register',
+        element: <Register />
+      },
+      {
+        index: true,
+        element: <Landing />
       }
-      // {
-      //   path: 'units/:subjectId',
-      //   element: <Units />
-      // },
-      // {
-      //   path: 'topics/:unitId',
-      //   element: <Topics />
-      // }, 
-      // {
-      //   path: 'solve/:topicId',
-      //   element: <Solve />
-      // }
     ]
   }
 ])
