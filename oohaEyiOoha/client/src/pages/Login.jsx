@@ -1,11 +1,14 @@
 import React from 'react';
 import styled from 'styled-components';
 import backgroundImage from '../assets/mg.png';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify'
+import logo from '../assets/edokati.png'
+
 
 const Container = styled.div`
   background-color: transparent; 
   border-radius: 10px;
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
   position: relative;
   overflow: hidden;
   width: 50vw;
@@ -68,6 +71,8 @@ const Input = styled.input`
   width: 100%;
 `;
 
+
+
 const Button = styled.button`
   border-radius: 20px;  
   background-color: rgba(67, 20, 7, 1); 
@@ -112,8 +117,6 @@ const OverlayContainer = styled.div`
 
 const Overlay = styled.div`
   background: rgba(67, 20, 7, 1); 
-  /* background: linear-gradient(to right,  rgba(67, 20, 7, 1), rgba(235, 152, 78, 1));
-  background: linear-gradient(to left, rgba(235, 152, 78, 1), rgba(67, 20, 7, 1)); */
   background-repeat: no-repeat;
   background-size: cover;
   background-position: 0 0;
@@ -162,12 +165,72 @@ const Paragraph = styled.p`
   margin: 20px 0 30px;
 `;
 
-function Login() {
+const Login = () => {
   const [signIn, setSignIn] = React.useState(true);
+  const navigate = useNavigate();
 
   const toggle = (signInState) => {
     setSignIn(signInState);
   }
+
+  const handleSignIn = async (event) => {
+    event.preventDefault();
+    const email = event.target.email.value;
+    const password = event.target.password.value;
+
+    try {
+      const response = await fetch('/api/v1/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        toast.success(data.msg)
+        console.log('Login successful:', data);
+        navigate('/home');
+      } else {
+        toast.error(data.message);
+        console.error('Login failed:', data);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const handleSignUp = async (event) => {
+    event.preventDefault();
+    const name = event.target.name.value;
+    const email = event.target.email.value;
+    const password = event.target.password.value;
+    const password1 = event.target.password1.value;
+
+    try {
+      const response = await fetch('/api/v1/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, email, password, password1 }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        toast.success(data.message);
+        toast.success("Please login to continue");
+        navigate('/login');
+        console.log('Registration successful:', data);
+      } else {
+        // Handle registration errors
+        console.error('Registration failed:', data);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
 
   return (
     <div
@@ -176,7 +239,7 @@ function Login() {
         justifyContent: 'center',
         alignItems: 'center',
         height: '100vh',
-        backgroundImage: `url(${backgroundImage})`, // Background image added here
+        backgroundImage: `url(${backgroundImage})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat'
@@ -188,32 +251,32 @@ function Login() {
         alignItems: 'center',
         height: '100vh',
         width: '100vw',
-        backgroundColor: 'rgba(251, 146, 60, 0.3)',
+        backgroundColor: 'rgba(0, 0, 0, 0.3)',
       }}>
         <Container>
           <SignUpContainer signinIn={signIn}>
-            <Form>
+            <Form onSubmit={handleSignUp}>
               <Title className='title'>Create Account</Title>
-              <Input type="text" placeholder='Name' />
-              <Input type="email" placeholder='Email' />
-              <Input type="password" placeholder='Password' />
-              <Input type="language" placeholder='Language' />
-              <Button>Sign Up</Button>
+              <Input type="text" name="name" placeholder='Name' required />
+              <Input type="email" name="email" placeholder='Email' required />
+              <Input type="password" name="password" placeholder='Password' required />
+              <Input type="password" name="password1" placeholder='Confirm Password' required />
+              <Button type="submit">Sign Up</Button>
             </Form>
           </SignUpContainer>
           <SignInContainer signinIn={signIn}>
-            <Form>
+            <Form onSubmit={handleSignIn}>
               <Title className='title'>Log In </Title>
-              <Input type="email" placeholder='Email' />
-              <Input type="password" placeholder='Password' />
+              <Input type="email" name="email" placeholder='Email' required />
+              <Input type="password" name="password" placeholder='Password' required />
               <Anchor href='#'>Forgot your password?</Anchor>
-              <Button>Sign In</Button>
+              <Button type="submit">Sign In</Button>
             </Form>
           </SignInContainer>
           <OverlayContainer signinIn={signIn}>
             <Overlay signinIn={signIn}>
               <LeftOverlayPanel signinIn={signIn}>
-                <Title className='title'>Welcome chef!</Title>
+                <img src={logo} className='scale-125' alt="Logo" style={{ marginBottom: '30%'}}/>
                 <Paragraph>
                   Already a member ?
                 </Paragraph>
@@ -222,7 +285,7 @@ function Login() {
                 </GhostButton>
               </LeftOverlayPanel>
               <RightOverlayPanel signinIn={signIn}>
-                <Title className='title'>Hello, chef!</Title>
+              <img src={logo} className='scale-125' alt="Logo" style={{ marginBottom: '30%'}}/>
                 <Paragraph>
                   Not a member ?
                 </Paragraph>

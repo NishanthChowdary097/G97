@@ -4,23 +4,20 @@
 
 /* Custom scrollbar styles */
 .custom-scrollbar::-webkit-scrollbar {
-    width: 8px;
+    width: 4px;
   }
   
   .custom-scrollbar::-webkit-scrollbar-track {
     background: transparent; 
-    border-radius: 100px;
+    border-radius: 10px;
   }
   
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #7c2d12; 
-    border-radius: 100px;
+    background: #431407; 
+    border-radius: 10px;
   }
   
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #431407; 
-    border-radius: 100px;
+    border-radius: 10px;
   }
-
-  
-  
