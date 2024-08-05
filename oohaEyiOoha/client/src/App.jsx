@@ -4,7 +4,9 @@ import {
   HomeLayout,
   Home,
   Error,
-  Login
+  Login,
+  Register,
+  Landing
 } from './pages'
 
 
@@ -15,12 +17,20 @@ const router = createBrowserRouter([
     errorElement: <Error />,
     children: [
       {
-        index: true,
+        path:'home',
         element: <Home />,
       },
       {
         path: 'login',
         element: <Login />
+      },
+      {
+        path: 'register',
+        element: <Register />
+      },
+      {
+        index: true,
+        element: <Landing />
       }
     ]
   }
