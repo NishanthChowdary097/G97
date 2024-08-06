@@ -12,39 +12,39 @@ import 'slick-carousel/slick/slick-theme.css';
 const teamMembers = [
   {
     name: 'Ananth',
-    position: 'Frontend',
+    position: 'Full Stack',
     image: 'https://teleuniv.net.in/sanjaya/student-images/245322733105.jpg',
-    description: '#pantulu'
+    description: ''
   },
   {
     name: 'Rasmitha',
     position: 'Backend',
     image: 'https://teleuniv.net.in/sanjaya/student-images/245322733034.jpg',
-    description: '#pantulamma'
+    description: ''
   },
   {
     name: 'Mohith',
-    position: 'Frontend',
+    position: 'Full Stack',
     image: 'https://teleuniv.net.in/sanjaya/student-images/245322733099.jpg',
-    description: '#mosako'
+    description: ''
   },
   {
     name: 'Nishanth',
-    position: 'Backend',
-    image: 'https://teleuniv.net.in/sanjaya/student-images/245322733097.jpg',
-    description: '#bossBattlar'
+    position: 'Backend and LLM',
+    image: nish,
+    description: ''
   },
   {
     name: 'Nithin',
     position: 'LLM',
     image: 'https://teleuniv.net.in/sanjaya/student-images/245322733076.jpg',
-    description: '#aitheEmChedamAntav'
+    description: ''
   },
   {
     name: 'Fahad',
-    position: 'Frontend',
-    image: 'https://teleuniv.net.in/sanjaya/student-images/245322733098.jpg',
-    description: '#naToniPetukoku'
+    position: 'Frontend and Designing',
+    image: fah,
+    description: ''
   },
 ];
 
