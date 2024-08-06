@@ -1,3 +1,12 @@
+:root {
+  /* --bg: #2e3138; */
+  --bg: #4B3621;
+  --primary1: #4B3621;
+  --primary2: #ffedd5;
+  --fg-t: #fff;
+  --bg-orange-100: #ffedd5; /* Adding the new color */
+}
+
 .pl {
   box-shadow: 2em 0 2em rgba(0, 0, 0, 0.2) inset,
     -2em 0 2em rgba(255, 255, 255, 0.1) inset;
@@ -36,7 +45,7 @@
 
 .pl__dot:before,
 .pl__dot:after {
-  content: "";
+  content: '';
   display: block;
   left: 0;
   width: inherit;
