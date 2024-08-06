@@ -1,6 +1,6 @@
 const express = require("express")
 const route = express.Router();
-const {admin}=require("../schema/adminschema");
+// const {admin}=require("../schema/adminschema");
 
 route.get("/unreviwed",(req,res)=>{
     res.send("admin");
@@ -9,3 +9,5 @@ route.get("/unreviwed",(req,res)=>{
 route.get("/review",(req,res)=>{
     res.send("admin");
 })
+
+module.exports = route;

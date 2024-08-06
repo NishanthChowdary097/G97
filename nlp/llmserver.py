@@ -15,6 +15,7 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
+print("Hi")
 
 logger.info(f"Using device: {device}")
 

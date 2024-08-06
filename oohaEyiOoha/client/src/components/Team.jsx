@@ -1,10 +1,10 @@
 import React from 'react';
 import teja from '../assets/images/teja.jpeg';
 import ras from '../assets/images/ras.jpeg';
-import nish from '../assets/images/nish.jpeg';
+import nish from '../assets/images/245322733097.jpg';
 import mo from '../assets/images/mo.jpeg';
 import nit from '../assets/images/nit.jpeg';
-import fah from '../assets/images/fah.jpeg';
+import fah from '../assets/images/245322733098.jpg';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
