@@ -163,7 +163,7 @@ const Paragraph = styled.p`
 `;
 
 const Login = () => {
-  const [signIn, setSignIn] = React.useState(false); // Default to Sign Up form
+  const [signIn, setSignIn] = React.useState(false);
   const navigate = useNavigate();
 
   const toggle = (signInState) => {

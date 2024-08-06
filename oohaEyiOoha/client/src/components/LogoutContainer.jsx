@@ -12,7 +12,7 @@ const LogoutContainer = () => {
         try {
             await customFetch.get('/auth/logout');
             toast.success('Logout Successful');
-            navigate('/'); // Redirect after logout
+            navigate('/');
         } catch (error) {
             toast.error('Error logging out');
             console.error('Logout error:', error);
@@ -35,14 +35,6 @@ const LogoutContainer = () => {
                 className={`origin-top-right absolute right-0 mt-2 w-28 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none transition-opacity duration-200 ${showLogout ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
                 style={{ zIndex: 10 }}
             >
-                <button
-                    type="button"
-                    className="w-full text-left px-4 py-2 text-gray-700 hover:rounded-lg flex justify-center hover:bg-orange-950 hover:text-white hover:font-bold focus:outline-none"
-                    onClick={() => { /* handle profile logic here */ }}
-                >
-                    Profile
-                </button>
-                <div className="border border-gray-300"></div>
                 <button
                     type="button"
                     className="w-full text-left px-4 py-2 text-gray-700 flex justify-center hover:rounded-lg hover:bg-orange-950 hover:text-white hover:font-bold focus:outline-none"

@@ -141,7 +141,7 @@ const OverlayPanel = styled.div`
   width: 50%;
   transform: translateX(0);
   transition: transform 0.6s ease-in-out;
-  background: transparent; /* Set background to transparent */
+  background: transparent;
 `;
 
 const LeftOverlayPanel = styled(OverlayPanel)`

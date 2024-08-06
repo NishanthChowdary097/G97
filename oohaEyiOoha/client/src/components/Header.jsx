@@ -17,7 +17,7 @@ const Header = ({ titles }) => {
   const sliderSettings = {
     dots: true,
     infinite: true,
-    speed: 1000, // Increased speed for smoother transitions
+    speed: 1000,
     slidesToShow: 1,
     slidesToScroll: 1,
     autoplay: true,
@@ -41,7 +41,6 @@ const Header = ({ titles }) => {
         ))}
       </Slider>
 
-      {/* Text Overlay */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 z-10">
         <h1
           className={`text-white text-4xl md:text-5xl font-bold mb-4 transition-transform duration-1000 ease-in-out`}

@@ -200,11 +200,11 @@ const recipes = [
 
 
 const register = async (req, res) => {
-    const { name, email, password: plainPassword, language } = req.body;
+    const { name, email, password: plainPassword } = req.body;
 
     const password = await hashPassword(plainPassword);
 
-    let user = await User.create({ name, email, password, language });
+    let user = await User.create({ name, email, password });
 
     await user.save();
 
@@ -219,28 +219,24 @@ const login = async (req, res) => {
         console.log("Login request:", req.body);
         const { email, password } = req.body;
 
-        // Check if the user exists
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        // Verify the password
         const isPasswordCorrect = await comparePassword(password, user.password);
         if (!isPasswordCorrect) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        // Create a JWT token
         const token = createJWT({ userId: user._id });
 
-        // Set the cookie with the token
         const oneDay = 1000 * 60 * 60 * 24; // 24 hours
         res.cookie('token', token, {
             httpOnly: true,
             expires: new Date(Date.now() + oneDay),
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'Strict', // Prevents CSRF attacks
+            sameSite: 'Strict',
         });
 
         res.status(200).json({ msg: 'User logged in' });
@@ -287,7 +283,7 @@ const fetchRecipes = async (req, res) => {
     const ingredients = req.body.ingredients;
     const url = 'http://localhost:5000/generate-recipe';
     const data = { ingredients };
-
+    
     try {
         const requests = Array(5).fill().map(() => axios.post(url, data));
         const responses = await Promise.all(requests);
@@ -304,8 +300,6 @@ const fetchRecipes = async (req, res) => {
     }
 };
 
-module.exports = { fetchRecipes };
-
 
 const starRecipe = async (req, res) => {
     try {
@@ -317,14 +311,12 @@ const starRecipe = async (req, res) => {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
-        // Check if the recipe already exists in favourites
         const existingRecipe = await Fav.findOne({ recipeName: name });
         let favId;
 
         if (existingRecipe) {
             favId = existingRecipe._id;
         } else {
-            // Create a new favourite recipe
             const newFavourite = new Fav({
                 recipeName: name,
                 recipeIngrids: ingredients,
@@ -335,9 +327,8 @@ const starRecipe = async (req, res) => {
             favId = result._id;
         }
 
-        // Update the user's favourites array
         await User.findByIdAndUpdate(userId, {
-            $addToSet: { favourites: favId } // $addToSet ensures no duplicates
+            $addToSet: { favourites: favId }
         });
 
         res.status(200).json({ message: 'Recipe added to favourites' });
@@ -357,11 +348,9 @@ const createHistory = async (req, res) => {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
-        // Check if the recipe already exists in favourites
         const existingRecipe = await History.findOne({ recipeName: name });
         let favId;
 
-        // Create a new favourite recipe
         const newFavourite = new History({
             recipeName: name,
             recipeIngrids: ingredients,
@@ -372,9 +361,8 @@ const createHistory = async (req, res) => {
         favId = result._id;
 
 
-        // Update the user's favourites array
         await User.findByIdAndUpdate(userId, {
-            $push: { history: favId } // $addToSet ensures no duplicates
+            $push: { history: favId } 
         });
 
         res.status(200).json({ message: 'Recipe added to history' });
@@ -398,7 +386,7 @@ const fetchFavs = async (req, res) => {
             return res.status(401).json({ error: 'Invalid token' });
         }
 
-        const userId = val.userId; // Assuming the verifyJWT function returns an object with the user's ID
+        const userId = val.userId; 
         const user = await User.findById(userId).populate('favourites');
 
         if (!user) {
@@ -424,12 +412,12 @@ const fetchHistory = async (req, res) => {
             return res.status(401).json({ error: 'Invalid token' });
         }
 
-        const userId = val.userId; // Assuming the verifyJWT function returns an object with the user's ID
+        const userId = val.userId; 
         const user = await User.findById(userId).populate({
             path: 'history',
             options: {
-                sort: { createdAt: -1 }, // Sort by creation date in descending order
-                limit: 10 // Limit to 10 recipes
+                sort: { createdAt: -1 },
+                limit: 10 
             }
         });
 
@@ -449,7 +437,6 @@ const removeRecipe = async (req, res) => {
     const { recipeName } = req.body;
 
     try {
-        // Verify user token
         const token = req.cookies.token;
         if (!token) {
             return res.status(401).json({ message: 'Unauthorized access' });
@@ -460,14 +447,12 @@ const removeRecipe = async (req, res) => {
             return res.status(401).json({ message: 'Invalid token' });
         }
 
-        // Find and delete the recipe from favourites collection
         const deletedRecipe = await Fav.findOneAndDelete({ recipeName });
         if (!deletedRecipe) {
             return res.status(404).json({ message: 'Recipe not found' });
         }
 
-        // Remove the recipe reference from the user's favourites array
-        const userId = val.userId; // Assuming verifyJWT returns an object with user ID
+        const userId = val.userId;
         await User.findByIdAndUpdate(userId, {
             $pull: { favourites: deletedRecipe._id }
         });

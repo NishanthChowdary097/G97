@@ -9,7 +9,7 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-model_name = "eaglet/Testing"
+model_name = "BossBattlar/G97"
 model = AutoModelForCausalLM.from_pretrained(model_name)
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
@@ -55,7 +55,7 @@ def parse_response(response_text):
         if any(line.lower().startswith(keyword) for keyword in ['name:', 'recipe:', 'item:', 'title:']):
             name = line.split(':', 1)[1].strip()
             section = 'ingredients'
-        elif any(line.lower().startswith(keyword) for keyword in ['directions:', 'steps:']):
+        elif line.lower().startswith('ingredients:'):
             section = 'ingredients'
         elif line.lower().startswith('steps:'):
             section = 'steps'
@@ -91,7 +91,7 @@ def generate_recipe():
         else:
             logger.info("Generated response is invalid. Retrying...")
 
-    return jsonify({"recipe": formatted_response})
+    return jsonify({"parsed_response": formatted_response, "raw_response": response_text})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
