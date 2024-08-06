@@ -92,7 +92,7 @@ def generate_recipe():
         else:
             logger.info("Generated response is invalid. Retrying...")
 
-    return jsonify({"parsed_response": formatted_response, "raw_response": response_text})
+    return jsonify({"recipe": formatted_response})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
